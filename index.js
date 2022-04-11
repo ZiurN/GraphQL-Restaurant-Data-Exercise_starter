@@ -91,19 +91,45 @@ var schema = buildSchema(`
 // The root provides a resolver function for each API endpoint
 var root = {
 	restaurant: (arg) => {
-		// Your code goes here
+		return restaurants.filter(restaurant => (
+			restaurant.id === arg.id
+		))[0];
 	},
 	restaurants: () => {
-		// Your code goes here
+		return restaurants;
 	},
-	setrestaurant: ({ input }) => {
-		// Your code goes here
+	setrestaurant: ({input}) => {
+		restaurants.push({name: input.name, description: input.description});
+		return input;
 	},
 	deleterestaurant: ({ id }) => {
-		// Your code goes here
+		let deletedRestaurant = restaurants.filter(restaurant => (
+			restaurant.id === id
+		))[0];
+		restaurants = restaurants.filter(restaurant => (
+			restaurant.id != id
+		));
+		let ok = !restaurants.includes(deletedRestaurant);
+		return {ok};
 	},
 	editrestaurant: ({ id, ...restaurant }) => {
-		// Your code goes here
+		let restaurantsToUpdate = restaurants.filter(restaurant => (
+			restaurant.id === id
+		))[0];
+		if (restaurantsToUpdate.length = 0) {
+			throw new Error('The restaurant doesn\'t exists');
+		}
+		let updatedRestaurant;
+		let updatedRestaurantList = [];
+		restaurants.forEach(currentRestaurant => {
+			if (currentRestaurant.id === id) {
+				currentRestaurant = {...currentRestaurant,...restaurant}
+				updatedRestaurant = currentRestaurant;
+			}
+			updatedRestaurantList.push(currentRestaurant);
+		});
+		restaurants = updatedRestaurantList;
+		return updatedRestaurant;
 	},
 };
 var app = express();
@@ -117,4 +143,3 @@ app.use(
 );
 var port = 5500;
 app.listen(5500, () => console.log("Running Graphql on Port:" + port));
-export default root;
